@@ -2,7 +2,10 @@ package tech.toshitworks.blogapp.data.repository
 
 import okio.IOException
 import tech.toshitworks.blogapp.data.remote.BlogApi
+import tech.toshitworks.blogapp.data.remote.CategoryBodyDto
 import tech.toshitworks.blogapp.data.remote.LoginBodyDto
+import tech.toshitworks.blogapp.data.remote.PostBodyDto
+import tech.toshitworks.blogapp.data.remote.PostResponseBodyDto
 import tech.toshitworks.blogapp.data.remote.SignUpBodyDto
 import tech.toshitworks.blogapp.data.remote.TokenDto
 import tech.toshitworks.blogapp.domain.BlogAppRepository
@@ -42,6 +45,71 @@ class BlogAppRepositoryImpl @Inject constructor(
     override suspend fun verify(): Resource<Boolean> {
         return try {
             val response = blogApi.verify()
+            Resource.Success(response.body())
+        }catch (e: IOException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }catch (e: HttpRetryException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }
+    }
+
+    override suspend fun getAllCategory(): Resource<List<CategoryBodyDto>> {
+        return try {
+            val response = blogApi.getAllCategory()
+            Resource.Success(response.body())
+        }catch (e: IOException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }catch (e: HttpRetryException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }
+    }
+
+    override suspend fun getCategoryById(id: Int): Resource<CategoryBodyDto> {
+        return try {
+            val response = blogApi.getCategoryById(id)
+            Resource.Success(response.body())
+        }catch (e: IOException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }catch (e: HttpRetryException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }
+    }
+
+    override suspend fun getPostByCategory(id: Int): Resource<List<PostBodyDto>> {
+        return try {
+            val response = blogApi.getPostByCategory(id)
+            Resource.Success(response.body())
+        }catch (e: IOException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }catch (e: HttpRetryException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }
+    }
+
+    override suspend fun getAllPost(): Resource<PostResponseBodyDto> {
+        return try {
+            val response = blogApi.getAllPost()
+            Resource.Success(response.body())
+        }catch (e: IOException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }catch (e: HttpRetryException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }
+    }
+
+    override suspend fun getSearchedPost(query: String): Resource<PostResponseBodyDto> {
+        return try {
+            val response = blogApi.getPostByQuery(query)
             Resource.Success(response.body())
         }catch (e: IOException){
             e.printStackTrace()

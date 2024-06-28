@@ -22,18 +22,6 @@ class DataStoreManager @Inject constructor(
         }
     }
 
-    override suspend fun saveCategoryViewed() {
-        dataStore.edit {
-            it[PreferencesKey.CATEGORY_VIEWED] = true
-        }
-    }
-
-    override fun getCategoryViewed(): Flow<Boolean?> {
-        return dataStore.data.map {
-            it[PreferencesKey.CATEGORY_VIEWED]
-        }
-    }
-
     override suspend fun saveOnboardingViewed() {
         dataStore.edit {
             it[PreferencesKey.ONBOARDING_VIEWED] = true
@@ -44,5 +32,19 @@ class DataStoreManager @Inject constructor(
         return dataStore.data.map {
             it[PreferencesKey.ONBOARDING_VIEWED]
         }
+    }
+
+    override suspend fun saveCategories(set: Set<String>) {
+        dataStore.edit {
+            it[PreferencesKey.CATEGORIES] = set
+            println("saved in dsp")
+        }
+    }
+
+    override fun getCategories(): Flow<Set<String>> {
+        return  dataStore.data.map {
+            it[PreferencesKey.CATEGORIES] ?: emptySet()
+        }
+
     }
 }

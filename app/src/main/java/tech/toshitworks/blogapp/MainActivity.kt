@@ -18,20 +18,13 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    @Inject
-    lateinit var splashScreenViewModel: SplashScreenViewModel
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        installSplashScreen().setKeepOnScreenCondition{
-            !splashScreenViewModel.loadingState.value
-        }
         setContent {
             BlogAppTheme {
-                val screen by splashScreenViewModel.screenState
                 val navController = rememberNavController()
-                NavGraphSetup(navController = navController,screen = screen)
+                NavGraphSetup(navController = navController)
             }
         }
     }

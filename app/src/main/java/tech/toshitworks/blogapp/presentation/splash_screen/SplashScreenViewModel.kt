@@ -5,6 +5,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -14,6 +15,7 @@ import tech.toshitworks.blogapp.domain.BlogAppRepository
 import tech.toshitworks.blogapp.utils.Routes
 import javax.inject.Inject
 
+@HiltViewModel
 class SplashScreenViewModel @Inject constructor(
     private val preferenceManager: PreferenceManager,
     private val blogAppRepository: BlogAppRepository
@@ -29,8 +31,9 @@ class SplashScreenViewModel @Inject constructor(
                 if (it == true) {
                     val isVerified = blogAppRepository.verify().data ?: false
                     if (isVerified) {
-                        val categoryViewed = preferenceManager.getCategoryViewed().first() ?: false
-                        if (categoryViewed) {
+                        val categoryViewed = preferenceManager.getCategories().first()
+                        println("hi $categoryViewed ${categoryViewed.isNotEmpty()} ${categoryViewed.size in 5.. 20}")
+                        if (categoryViewed.isNotEmpty() && categoryViewed.size in 5..20) {
                             _screenRoute.value = Routes.HomeScreen.route
                         } else {
                             _screenRoute.value = Routes.CategoryScreen.route
@@ -41,6 +44,7 @@ class SplashScreenViewModel @Inject constructor(
                 } else {
                     _screenRoute.value = Routes.OnBoardingScreen.route
                 }
+                _loadingState.value = false
             }
         }
     }

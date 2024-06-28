@@ -83,6 +83,7 @@ fun LoginPage(
                         message = it.message,
                         duration = it.duration
                     )
+                    navController.popBackStack()
                     navController.navigate(Routes.CategoryScreen.route)
                 }
             }
