@@ -1,7 +1,8 @@
 package tech.toshitworks.blogapp.presentation.home
 
 import android.annotation.SuppressLint
-import android.graphics.drawable.shapes.Shape
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -16,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -29,7 +31,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
-import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -43,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
@@ -52,6 +54,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.delay
@@ -60,6 +63,7 @@ import tech.toshitworks.blogapp.presentation.components.Categories
 import tech.toshitworks.blogapp.presentation.components.PostCard
 import tech.toshitworks.blogapp.utils.Routes
 
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -68,6 +72,7 @@ fun HomePage(
     navController: NavHostController
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val onEvent = viewModel::onEvent
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val sheetState = rememberModalBottomSheetState(
@@ -79,7 +84,7 @@ fun HomePage(
     val coroutineScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(
         pageCount = {
-            state.categories.size
+            state.categories.size + 1
         }
     )
     val focusRequester = remember {
@@ -98,164 +103,183 @@ fun HomePage(
 
         }
     LaunchedEffect(key1 = pagerState) {
-        snapshotFlow { pagerState.currentPage }.collect {
-            onEvent(HomeEvents.OnCategoryChanged(it))
+        println("invnoked")
+        if(!isLoading) {
+            println("kefy")
+            snapshotFlow { pagerState.currentPage }.collect {
+                onEvent(HomeEvents.OnCategoryChanged(it))
+            }
         }
     }
     LaunchedEffect(key1 = Unit) {
         if (state.searchQuery.isNotEmpty())
             onEvent(HomeEvents.OnSearchQueryChanged(state.searchQuery))
     }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Crossfade(
-            targetState = state.isSearchBarVisible,
-            label = "Switch"
-        ) { ts ->
-            if (ts) {
-                Scaffold {
-                    Column {
-                        SearchBar(
-                            modifier = Modifier
-                                .focusRequester(focusRequester),
-                            query = state.searchQuery,
-                            placeholder = {
-                                Text(text = "Search posts ...")
-                            },
-                            trailingIcon = {
-                                IconButton(
-                                    onClick = {
+    if (!isLoading) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            Crossfade(
+                targetState = state.isSearchBarVisible,
+                label = "Switch"
+            ) { ts ->
+                if (ts) {
+                    Scaffold {
+                        Column {
+                            SearchBar(
+                                modifier = Modifier
+                                    .focusRequester(focusRequester),
+                                query = state.searchQuery,
+                                placeholder = {
+                                    Text(text = "Search posts ...")
+                                },
+                                trailingIcon = {
+                                    IconButton(
+                                        onClick = {
+                                            onEvent(HomeEvents.OnCloseIconClicked)
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "Close Bar"
+                                        )
+                                    }
+                                },
+                                onQueryChange = { s ->
+                                    onEvent(HomeEvents.OnSearchQueryChanged(s))
+                                },
+                                onSearch = {
+                                    keyboardController?.hide()
+                                    focusManager.clearFocus()
+                                },
+                                active = state.isSearchBarVisible,
+                                onActiveChange = { b ->
+                                    if (!b) {
                                         onEvent(HomeEvents.OnCloseIconClicked)
+                                    }
+                                }
+                            ) {
+                                LazyColumn(
+                                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                                ) {
+                                    items(state.posts) {
+                                        PostCard(
+                                            postBody = it,
+                                            fullPost = {id->
+                                                navController.navigate("${Routes.PostScreen.route}/$id")
+                                            },
+                                            seeUser = {
+                                                navController.navigate(Routes.ProfileScreen.route)
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    Scaffold(
+                        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+                        topBar = {
+                            HomeScreenTopBar(
+                                scrollBehavior = scrollBehavior,
+                                onProfile = {
+                                    navController.navigate(Routes.ProfileScreen.route)
+                                },
+                                onSearch = {
+                                    coroutineScope.launch {
+                                        delay(500)
+                                        focusRequester.requestFocus()
+                                    }
+                                    onEvent(HomeEvents.OnSearchIconClicked)
+                                }
+                            )
+                        },
+                        floatingActionButtonPosition = FabPosition.End,
+                        floatingActionButton = {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(5.dp))
+                                    .background(MaterialTheme.colorScheme.primary)
+
+                            ) {
+                                IconButton(
+                                    modifier = Modifier
+                                        .size(56.dp) // Size of the FAB
+                                        .background(
+                                            MaterialTheme.colorScheme.primary,
+                                            shape = CircleShape
+                                        ),
+                                    onClick = {
+                                        navController.navigate(Routes.AddPostScreen.route)
                                     }
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = "Close Bar"
+                                        imageVector = Icons.Filled.Add,
+                                        contentDescription = "Add Post",
+                                        tint = MaterialTheme.colorScheme.onPrimary
                                     )
-                                }
-                            },
-                            onQueryChange = { s ->
-                                onEvent(HomeEvents.OnSearchQueryChanged(s))
-                            },
-                            onSearch = {
-                                keyboardController?.hide()
-                                focusManager.clearFocus()
-                            },
-                            active = state.isSearchBarVisible,
-                            onActiveChange = {b->
-                                if(!b){
-                                    onEvent(HomeEvents.OnCloseIconClicked)
-                                }
-                            }
-                        ) {
-                            LazyColumn(
-                                verticalArrangement = Arrangement.spacedBy(6.dp),
-                            ) {
-                                items(state.posts) {
-//                                PostCard(
-//                                    article = a,
-//                                    onClick = {
-//                                        showBottomSheet = true
-//                                        onEvent(NewsScreenEvents.OnNewsCardClicked(it))
-//                                    }
-//                                )
                                 }
                             }
                         }
-                    }
-                }
-            } else {
-                Scaffold(
-                    modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-                    topBar = {
-                        HomeScreenTopBar(
-                            scrollBehavior = scrollBehavior,
-                            onProfile = {
-                                navController.navigate(Routes.ProfileScreen.route)
-                            },
-                            onSearch = {
-                                coroutineScope.launch {
-                                    delay(500)
-                                    focusRequester.requestFocus()
-                                }
-                                onEvent(HomeEvents.OnSearchIconClicked)
-                            }
-                        )
-                    },
-                    floatingActionButtonPosition = FabPosition.Center, floatingActionButton = {
-                        Box(
+                    ) { pv ->
+                        Column(
                             modifier = Modifier
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary)
-
+                                .fillMaxSize()
+                                .padding(pv)
                         ) {
-                            IconButton(
-                                modifier = Modifier
-                                    .size(56.dp) // Size of the FAB
-                                    .background(MaterialTheme.colorScheme.primary, shape = CircleShape),
-                                onClick = {}
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Add,
-                                    contentDescription = "Add Post",
-                                    tint = MaterialTheme.colorScheme.onPrimary
-                                )
-                            }
-                        }
-                    }
-                ) { pv ->
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(pv)
-                    ) {
-//                        Categories(
-//                            pagerState = pagerState,
-//                            categories = state.categories,
-//                            onCategorySelected = {
-//                                coroutineScope.launch {
-//                                    pagerState.animateScrollToPage(it)
-//                                }
-//                            }
-//                        )
-                        HorizontalPager(
-                            state = pagerState,
-                        ) {
-                            LazyColumn(
-                                verticalArrangement = Arrangement.spacedBy(6.dp),
-                            ) {
-                                items(state.posts) { a ->
-                                    PostCard(
-//                                        article = a,
-//                                        onClick = {
-//                                            showBottomSheet = true
-//                                            onEvent(NewsScreenEvents.OnNewsCardClicked(it))
-//                                        }
-                                    )
+                            Categories(
+                                pagerState = pagerState,
+                                categories = state.categories,
+                                onCategorySelected = {
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(it)
+                                    }
                                 }
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
+                            )
+                            HorizontalPager(
+                                state = pagerState,
                             ) {
-                                //if (state.error != null)
-//                                    RetryContent(
-//                                        error = states.error,
-//                                        onRetry = {
-//                                            onEvent(NewsScreenEvents.OnCategoryChanged(states.category))
-//                                        }
-//                                    )
+                                LazyColumn(
+                                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                                ) {
+                                    items(state.posts) { a ->
+                                        PostCard(
+                                            postBody = a,
+                                            fullPost = {id->
+                                                navController.navigate("${Routes.PostScreen.route}/$id")
+                                            },
+                                            seeUser = {
+                                                navController.navigate(Routes.ProfileScreen.route)
+                                            }
+                                        )
+                                    }
+                                }
+
                             }
                         }
                     }
                 }
             }
         }
+    }else{
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+                Text(
+                    modifier = Modifier
+                        .align(Alignment.Center),
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontSize = 40.sp
+                    ),
+                    text = "Loading..."
+                )
+        }
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -271,7 +295,6 @@ private fun HomeScreenTopBar(
             Text(
                 text = "Posts",
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
             )
         },
         actions = {
@@ -294,8 +317,8 @@ private fun HomeScreenTopBar(
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            titleContentColor = MaterialTheme.colorScheme.background,
+            actionIconContentColor = MaterialTheme.colorScheme.background,
         )
     )
 }

@@ -88,5 +88,9 @@ dependencies {
 
     implementation("androidx.core:core-splashscreen:1.0.1")
 
+    implementation("io.coil-kt:coil-compose:2.4.0")
+
+    implementation("com.mohamedrejeb.richeditor:richeditor-compose:1.0.0-rc05")
+
 
 }

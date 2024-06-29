@@ -3,6 +3,7 @@ package tech.toshitworks.blogapp.data.repository
 import okio.IOException
 import tech.toshitworks.blogapp.data.remote.BlogApi
 import tech.toshitworks.blogapp.data.remote.CategoryBodyDto
+import tech.toshitworks.blogapp.data.remote.CommentBodyDto
 import tech.toshitworks.blogapp.data.remote.LoginBodyDto
 import tech.toshitworks.blogapp.data.remote.PostBodyDto
 import tech.toshitworks.blogapp.data.remote.PostResponseBodyDto
@@ -81,6 +82,19 @@ class BlogAppRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getCategoryByTitle(title: String): Resource<List<CategoryBodyDto>> {
+        return try {
+            val response = blogApi.getCategoryByTitle(title)
+            Resource.Success(response.body())
+        }catch (e: IOException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }catch (e: HttpRetryException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }
+    }
+
     override suspend fun getPostByCategory(id: Int): Resource<List<PostBodyDto>> {
         return try {
             val response = blogApi.getPostByCategory(id)
@@ -107,9 +121,35 @@ class BlogAppRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getPostById(id: Int): Resource<PostBodyDto> {
+        return try {
+            val response = blogApi.getPostById(id)
+            Resource.Success(response.body())
+        }catch (e: IOException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }catch (e: HttpRetryException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }
+    }
+
     override suspend fun getSearchedPost(query: String): Resource<PostResponseBodyDto> {
         return try {
             val response = blogApi.getPostByQuery(query)
+            Resource.Success(response.body())
+        }catch (e: IOException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }catch (e: HttpRetryException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }
+    }
+
+    override suspend fun getCommentPyPost(id: Int): Resource<List<CommentBodyDto>> {
+        return try {
+            val response = blogApi.getCommentsByPost(id)
             Resource.Success(response.body())
         }catch (e: IOException){
             e.printStackTrace()

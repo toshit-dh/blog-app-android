@@ -44,5 +44,20 @@ interface BlogApi {
         @Path("keyword") query: String
     ): Response<PostResponseBodyDto>
 
+    @GET(Constants.POST_BY_ID)
+    suspend fun getPostById(
+        @Path("id") id: Int
+    ): Response<PostBodyDto>
+
+    @GET(Constants.COMMENTS_BY_POST)
+    suspend fun getCommentsByPost(
+        @Path("id") id: Int
+    ): Response<List<CommentBodyDto>>
+
+    @GET(Constants.CATEGORY_BY_TITLE)
+    suspend fun getCategoryByTitle(
+        @Path("title") title: String
+    ): Response<List<CategoryBodyDto>>
+
 
 }

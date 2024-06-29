@@ -37,7 +37,6 @@ class HomeViewModel @Inject constructor(
             val categoryBody = categories.map {
                 blogAppRepository.getCategoryById(it.toInt()).data!!.toCategoryBody()
             }
-            println(categoryBody)
             val post = blogAppRepository.getAllPost().data!!.content.map {
                 it.toPostBody()
             }
@@ -59,29 +58,31 @@ class HomeViewModel @Inject constructor(
                         pbd.toPostBody()
                     })
                 }
+                _isLoading.value = false
             }
         }
 
-//    private fun getCategoryPost(id: Int){
-//        _state.update {
-//            it.copy(posts = emptyList())
-//        }
-//        viewModelScope.launch {
-//            _isLoading.value = true
-//            val posts = if (id == 0){
-//                blogAppRepository.getPostByCategory(id).data!!.map{pbd->
-//                    pbd.toPostBody()
-//                }
-//            }else{
-//                blogAppRepository.getAllPost().data!!.map {
-//                    it.toPostBody()
-//                }
-//            }
-//            _state.update {
-//                it.copy(posts = posts)
-//            }
-//        }
-//    }
+    private fun getCategoryPost(id: Int){
+        _state.update {
+            it.copy(posts = emptyList())
+        }
+        viewModelScope.launch {
+            _isLoading.value = true
+            val posts = if (id != 0){
+                blogAppRepository.getPostByCategory(id).data!!.map{pbd->
+                    pbd.toPostBody()
+                }
+            }else{
+                blogAppRepository.getAllPost().data!!.content.map {
+                    it.toPostBody()
+                }
+            }
+            _state.update {
+                it.copy(posts = posts)
+            }
+            _isLoading.value = false
+        }
+    }
 
 
         fun onEvent(event: HomeEvents) {
@@ -90,7 +91,7 @@ class HomeViewModel @Inject constructor(
                     _state.update {
                         it.copy(isSearchBarVisible = false)
                     }
-                    //getCategoryPost(state.value.category)
+                    getCategoryPost(state.value.category)
                 }
 
                 HomeEvents.OnSearchIconClicked -> {
@@ -115,7 +116,7 @@ class HomeViewModel @Inject constructor(
                     _state.update {
                         it.copy(category = event.categoryId)
                     }
-                    //getCategoryPost(state.value.category)
+                    getCategoryPost(state.value.category)
                 }
             }
         }

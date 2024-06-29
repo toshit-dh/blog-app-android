@@ -9,5 +9,6 @@ sealed class Routes(val route: String) {
     data object HomeScreen: Routes("HomeScreen")
     data object ProfileScreen: Routes("ProfileScreen")
     data object PostScreen: Routes("PostScreen")
+    data object AddPostScreen: Routes("AddPostScreen")
     data object CategoryScreen: Routes("CategoryScreen")
 }
