@@ -36,7 +36,7 @@ fun PostCard(
             .padding(8.dp)
             .fillMaxWidth()
             .clickable {
-                fullPost(postBody.id)
+                fullPost(postBody.id!!)
             },
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation()
@@ -69,6 +69,7 @@ fun PostCard(
             }
             ImageHolder(
                 imageUrl = "${Constants.BASEURL}/images/${postBody.image}",
+                imageUri = null,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)

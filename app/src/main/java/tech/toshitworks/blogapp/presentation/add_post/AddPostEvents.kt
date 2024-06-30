@@ -1,5 +1,7 @@
 package tech.toshitworks.blogapp.presentation.add_post
 
+import android.content.Context
+import android.net.Uri
 import tech.toshitworks.blogapp.domain.model.CategoryBody
 
 sealed class AddPostEvents{
@@ -7,6 +9,12 @@ sealed class AddPostEvents{
     data object OnSearchIconClick: AddPostEvents()
     data class OnContentChange(val content: String): AddPostEvents()
     data class OnSearchQueryChange(val query: String): AddPostEvents()
-    data object OnAddPost: AddPostEvents()
+    data class OnAddPost(val context: Context): AddPostEvents()
     data class OnCategoryAdd(val categoryBody: CategoryBody): AddPostEvents()
+    data class OnAddChangePhoto(val image: Uri?): AddPostEvents()
+    data object OnChangeEditorControlVisibility: AddPostEvents()
+    data object OnChangeImageVisibility: AddPostEvents()
+    data object OnRemoveImage: AddPostEvents()
+    data object OnRemoveCategory: AddPostEvents()
+    data class OnTitleChange(val title: String): AddPostEvents()
 }

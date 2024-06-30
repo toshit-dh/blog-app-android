@@ -16,16 +16,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Comment
-import androidx.compose.material.icons.filled.Comment
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -42,6 +39,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.mohamedrejeb.richeditor.model.RichTextState
+import com.mohamedrejeb.richeditor.model.rememberRichTextState
+import com.mohamedrejeb.richeditor.ui.material3.RichText
 import tech.toshitworks.blogapp.domain.model.User
 import tech.toshitworks.blogapp.presentation.components.CommentsBottomSheet
 import tech.toshitworks.blogapp.presentation.components.ImageHolder
@@ -63,7 +63,8 @@ fun PostPage(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     var isBottomSheetOpen by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
-
+     val rtState = rememberRichTextState()
+    rtState.setHtml(state.postBody.content)
     CommentsBottomSheet(
         comment = state.comment,
         sheetState = sheetState,
@@ -109,9 +110,12 @@ fun PostPage(
                         .padding(horizontal = 12.dp)
                         .verticalScroll(rememberScrollState())
                 ) {
-                    ImageHolder(imageUrl = "${Constants.BASEURL}/images/${state.postBody.image}")
-                    Text(
-                        text = state.postBody.content,
+                    ImageHolder(
+                        imageUrl = "${Constants.BASEURL}/images/${state.postBody.image}",
+                        imageUri = null
+                    )
+                    RichText(
+                        state = rtState,
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.padding(vertical = 8.dp)
                     )

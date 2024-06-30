@@ -1,5 +1,6 @@
 package tech.toshitworks.blogapp.data.repository
 
+import okhttp3.MultipartBody
 import okio.IOException
 import tech.toshitworks.blogapp.data.remote.BlogApi
 import tech.toshitworks.blogapp.data.remote.CategoryBodyDto
@@ -85,6 +86,23 @@ class BlogAppRepositoryImpl @Inject constructor(
     override suspend fun getCategoryByTitle(title: String): Resource<List<CategoryBodyDto>> {
         return try {
             val response = blogApi.getCategoryByTitle(title)
+            Resource.Success(response.body())
+        }catch (e: IOException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }catch (e: HttpRetryException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }
+    }
+
+    override suspend fun addPost(
+        file: MultipartBody.Part?,
+        postBodyDto: PostBodyDto,
+        id: Int
+    ): Resource<PostBodyDto> {
+        return try {
+            val response = blogApi.addPost(file,postBodyDto, id)
             Resource.Success(response.body())
         }catch (e: IOException){
             e.printStackTrace()

@@ -108,6 +108,10 @@ fun SignUpPage(
                     )
                     navController.navigate(Routes.LoginScreen.route)
                 }
+
+                is SnackBarEvent.ShowPostSnackBar -> {
+
+                }
             }
         }
     }

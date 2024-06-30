@@ -12,6 +12,7 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import tech.toshitworks.blogapp.domain.model.CategoryBody
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -38,6 +39,7 @@ fun Categories(
                             modifier = Modifier
                                 .padding(vertical = 8.dp, horizontal = 2.dp),
                             text = c.title,
+                            fontSize = 20.sp,
                             color = if (pagerState.currentPage == index) MaterialTheme.colorScheme.background else Color.Unspecified
                         )
                     },

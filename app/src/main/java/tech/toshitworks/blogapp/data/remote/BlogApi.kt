@@ -1,12 +1,15 @@
 package tech.toshitworks.blogapp.data.remote
 
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
 import tech.toshitworks.blogapp.utils.Constants
-import tech.toshitworks.blogapp.utils.Resource
+
 
 interface BlogApi {
 
@@ -59,5 +62,12 @@ interface BlogApi {
         @Path("title") title: String
     ): Response<List<CategoryBodyDto>>
 
+    @Multipart
+    @POST(Constants.ADD_POST)
+    suspend fun addPost(
+        @Part file: MultipartBody.Part?,
+        @Part("post") postBodyDto: PostBodyDto,
+        @Path("id") id: Int,
+    ): Response<PostBodyDto>
 
 }

@@ -12,6 +12,9 @@ sealed class SnackBarEvent {
         val message: String,
         val duration: SnackbarDuration = SnackbarDuration.Short
     ) : SnackBarEvent()
+    data class ShowPostSnackBar(
+        val id: Int
+    ): SnackBarEvent()
 
 }
 

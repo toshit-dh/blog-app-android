@@ -86,6 +86,10 @@ fun LoginPage(
                     navController.popBackStack()
                     navController.navigate(Routes.CategoryScreen.route)
                 }
+
+                is SnackBarEvent.ShowPostSnackBar -> {
+
+                }
             }
         }
     }

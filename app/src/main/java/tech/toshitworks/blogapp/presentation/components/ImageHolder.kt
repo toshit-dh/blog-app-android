@@ -1,5 +1,6 @@
 package tech.toshitworks.blogapp.presentation.components
 
+import android.net.Uri
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,14 +18,16 @@ import tech.toshitworks.blogapp.R
 @Composable
 fun ImageHolder(
     modifier: Modifier = Modifier,
-    imageUrl: String?
+    imageUrl: String?,
+    imageUri: Uri?,
 ){
     val context = LocalContext.current
     AsyncImage(
-        model = ImageRequest.Builder(context)
-            .data(imageUrl)
-            .crossfade(true)
-            .build(),
+        model = imageUri
+            ?: ImageRequest.Builder(context)
+                .data(imageUrl)
+                .crossfade(true)
+                .build(),
         contentDescription = "Article Image",
         contentScale = ContentScale.Crop,
         modifier = Modifier

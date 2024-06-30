@@ -13,4 +13,5 @@ object Constants{
     const val POST_BY_ID = "post/{id}"
     const val POST_ALL = "post"
     const val COMMENTS_BY_POST = "comment/post/{id}"
+    const val ADD_POST = "post/{id}"
 }

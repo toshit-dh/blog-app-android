@@ -1,5 +1,6 @@
 package tech.toshitworks.blogapp.domain
 
+import okhttp3.MultipartBody
 import retrofit2.Response
 import tech.toshitworks.blogapp.data.remote.CategoryBodyDto
 import tech.toshitworks.blogapp.data.remote.CommentBodyDto
@@ -37,4 +38,6 @@ interface BlogAppRepository {
     suspend fun getCommentPyPost(id: Int): Resource<List<CommentBodyDto>>
 
     suspend fun getCategoryByTitle(title: String): Resource<List<CategoryBodyDto>>
+
+    suspend fun addPost(file: MultipartBody.Part?,postBodyDto: PostBodyDto,id: Int): Resource<PostBodyDto>
 }

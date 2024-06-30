@@ -27,6 +27,7 @@ class LoginViewModel @Inject constructor(
     private val _snackBarEventFlow = MutableSharedFlow<SnackBarEvent>()
     val snackBarEventFlow = _snackBarEventFlow.asSharedFlow()
 
+
     fun onEvent(event: LoginEvents){
         when(event){
             is LoginEvents.OnLoginBodyChange -> {

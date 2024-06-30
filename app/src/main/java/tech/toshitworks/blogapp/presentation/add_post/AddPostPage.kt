@@ -1,30 +1,35 @@
 package tech.toshitworks.blogapp.presentation.add_post
 
 import android.annotation.SuppressLint
-import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.FormatAlignLeft
 import androidx.compose.material.icons.automirrored.filled.FormatAlignRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddLink
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FormatAlignCenter
 import androidx.compose.material.icons.filled.FormatBold
@@ -39,15 +44,20 @@ import androidx.compose.material.icons.filled.Title
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +70,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.ParagraphStyle
@@ -75,6 +86,9 @@ import androidx.navigation.NavHostController
 import com.mohamedrejeb.richeditor.model.RichTextState
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichTextEditor
+import tech.toshitworks.blogapp.presentation.components.ImageHolder
+import tech.toshitworks.blogapp.utils.Routes
+import tech.toshitworks.blogapp.utils.SnackBarEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -89,11 +103,40 @@ fun AddPostPage(
     val focusRequester = remember {
         FocusRequester()
     }
+    val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val rteState = rememberRichTextState()
     val titleSize = MaterialTheme.typography.displaySmall.fontSize
     val subtitleSize = MaterialTheme.typography.titleLarge.fontSize
+    val snackBarEvent = viewModel.snackBarEventFlow
+    val snackBarHostState = remember {
+        SnackbarHostState()
+    }
+    val singleImagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) {
+        onEvent(AddPostEvents.OnAddChangePhoto(it))
+    }
+    LaunchedEffect(key1 = true) {
+        snackBarEvent.collect{
+            when(it){
+                is SnackBarEvent.ShowSnackBar -> {
+                    snackBarHostState.showSnackbar(
+                        message = it.message,
+                        duration = it.duration
+                    )
+                }
+
+                is SnackBarEvent.ShowPostSnackBar -> {
+                    snackBarHostState.showSnackbar(
+                        message = POST_ADDED
+                    )
+                    navController.navigate("${Routes.PostScreen.route}/${it.id}")
+                }
+            }
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -188,15 +231,41 @@ fun AddPostPage(
                 }
             } else {
                 Scaffold(
+                    snackbarHost = {
+                        SnackbarHost(hostState = snackBarHostState)
+                    },
                     topBar = {
                         AddPostTopBar(
-                            onAddPost = {
-                                onEvent(AddPostEvents.OnAddPost)
-                            },
                             onSearch = {
                                 onEvent(AddPostEvents.OnSearchIconClick)
                             },
+                            title = state.title,
+                            onChangeClick = {s->
+                                onEvent(AddPostEvents.OnTitleChange(s))
+                            }
+                            , onBack = {
+                                navController.navigateUp()
+                            }
                         )
+                    },
+                    floatingActionButtonPosition = FabPosition.Start,
+                    floatingActionButton = {
+                        if (!state.showEditorControls)
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(5.dp))
+                                    .background(MaterialTheme.colorScheme.primary)
+
+                            ) {
+                                IconButton(onClick = {
+                                    onEvent(AddPostEvents.OnChangeEditorControlVisibility)
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowUpward,
+                                        contentDescription = ""
+                                    )
+                                }
+                            }
                     }
                 ) { pv ->
                     Column(
@@ -204,75 +273,51 @@ fun AddPostPage(
                             .fillMaxSize()
                             .padding(pv)
                     ) {
-                        if (state.selectedCategory == null)
-                            Card(
+                        Card(
+                            modifier = Modifier
+                                .padding(7.dp)
+                        ) {
+                            Row(
                                 modifier = Modifier
-                                    .padding(7.dp)
+                                    .fillMaxWidth()
+                                    .padding(4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(4.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(
-                                        text = "Select a category for post or add your own category",
-                                        color = MaterialTheme.colorScheme.error
-                                    )
-                                    IconButton(onClick = {}) {
-                                        Icon(
-                                            imageVector = Icons.Default.Add,
-                                            contentDescription = "",
-                                            tint = MaterialTheme.colorScheme.background
-                                        )
+                                Text(
+                                    text = if (state.selectedCategory == null) "Select a category add your own" else state.selectedCategory?.title
+                                        ?: "",
+                                    color = if (state.selectedCategory == null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onPrimaryContainer,
+                                    fontSize = 20.sp
+                                )
+                                Box {
+                                    Row {
+                                        if(state.selectedCategory == null)
+                                            IconButton(
+                                                onClick = {
+
+                                                }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Add,
+                                                    contentDescription = "",
+                                                )
+                                            }
+                                        if (state.selectedCategory != null)
+                                            IconButton(
+                                                onClick = {
+                                                    onEvent(AddPostEvents.OnRemoveCategory)
+                                                }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Close,
+                                                    contentDescription = "",
+                                                )
+                                            }
                                     }
                                 }
                             }
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(4.dp)
-                        ) {
-                            Text(
-                                text = state.selectedCategory?.title ?: "",
-                                style = MaterialTheme.typography.titleLarge
-                            )
                         }
-                        EditorControls(
-                            modifier = Modifier.weight(2f),
-                            state = rteState,
-                            onBoldClick = {
-                                rteState.toggleSpanStyle(SpanStyle(fontWeight = FontWeight.Bold))
-                            },
-                            onItalicClick = {
-                                rteState.toggleSpanStyle(SpanStyle(fontStyle = FontStyle.Italic))
-                            },
-                            onUnderlineClick = {
-                                rteState.toggleSpanStyle(SpanStyle(textDecoration = TextDecoration.Underline))
-                            },
-                            onTitleClick = {
-                                rteState.toggleSpanStyle(SpanStyle(fontSize = titleSize))
-                            },
-                            onSubtitleClick = {
-                                rteState.toggleSpanStyle(SpanStyle(fontSize = subtitleSize))
-                            },
-                            onTextColorClick = {
-                                rteState.toggleSpanStyle(SpanStyle(color = Color.Red))
-                            },
-                            onStartAlignClick = {
-                                rteState.toggleParagraphStyle(ParagraphStyle(textAlign = TextAlign.Start))
-                            },
-                            onEndAlignClick = {
-                                rteState.toggleParagraphStyle(ParagraphStyle(textAlign = TextAlign.End))
-                            },
-                            onCenterAlignClick = {
-                                rteState.toggleParagraphStyle(ParagraphStyle(textAlign = TextAlign.Center))
-                            },
-                            onExportClick = {
-                                Log.d("Editor", rteState.toHtml())
-                            }
-                        )
                         if (state.image == null) {
                             Card(
                                 modifier = Modifier
@@ -290,27 +335,125 @@ fun AddPostPage(
                                         color = MaterialTheme.colorScheme.error,
                                         fontSize = 20.sp
                                     )
-                                    IconButton(onClick = {}) {
+                                    IconButton(onClick = {
+                                        singleImagePicker.launch(
+                                            PickVisualMediaRequest(mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                        )
+                                    }) {
                                         Icon(
                                             imageVector = Icons.Default.Image,
-                                            contentDescription = ""
+                                            contentDescription = "",
                                         )
                                     }
                                 }
                             }
+                        } else {
+                            Card(
+                                modifier = Modifier
+                                    .padding(7.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .padding(7.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "Image",
+                                            fontSize = 30.sp
+                                        )
+                                        Box {
+                                            Row {
+
+                                                IconButton(
+                                                    onClick = {
+                                                        onEvent(AddPostEvents.OnChangeImageVisibility)
+                                                    }
+                                                ) {
+                                                    Icon(
+                                                        imageVector = if (state.showImage) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+                                                        contentDescription = ""
+                                                    )
+                                                }
+                                                IconButton(onClick = {
+                                                    onEvent(AddPostEvents.OnRemoveImage)
+                                                }) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Close,
+                                                        contentDescription = ""
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (state.showImage)
+                                        ImageHolder(imageUrl = null, imageUri = state.image)
+                                }
+                            }
                         }
-                        else{
-//                            Image(
-//                                bitmap = state.image,
-//                                contentDescription =
-//                            )
+                        Row {
+                            Card(
+                                modifier = Modifier
+                                    .padding(3.dp)
+                            ) {
+                                if (state.showEditorControls)
+                                    EditorControls(
+                                        modifier = Modifier.weight(2f),
+                                        state = rteState,
+                                        onHideClick = {
+                                            onEvent(AddPostEvents.OnChangeEditorControlVisibility)
+                                        },
+                                        isImage = state.image != null,
+                                        imageVisible = state.showImage,
+                                        error = state.error.isNotEmpty(),
+                                        onChangeClick = {s->
+                                            onEvent(AddPostEvents.OnContentChange(s))
+                                        },
+                                        onBoldClick = {
+                                            rteState.toggleSpanStyle(SpanStyle(fontWeight = FontWeight.Bold))
+                                        },
+                                        onItalicClick = {
+                                            rteState.toggleSpanStyle(SpanStyle(fontStyle = FontStyle.Italic))
+                                        },
+                                        onUnderlineClick = {
+                                            rteState.toggleSpanStyle(SpanStyle(textDecoration = TextDecoration.Underline))
+                                        },
+                                        onTitleClick = {
+                                            rteState.toggleSpanStyle(SpanStyle(fontSize = titleSize))
+                                        },
+                                        onSubtitleClick = {
+                                            rteState.toggleSpanStyle(SpanStyle(fontSize = subtitleSize))
+                                        },
+                                        onTextColorClick = {
+                                            rteState.toggleSpanStyle(SpanStyle(color = Color.Red))
+                                        },
+                                        onStartAlignClick = {
+                                            rteState.toggleParagraphStyle(ParagraphStyle(textAlign = TextAlign.Start))
+                                        },
+                                        onEndAlignClick = {
+                                            rteState.toggleParagraphStyle(ParagraphStyle(textAlign = TextAlign.End))
+                                        },
+                                        onCenterAlignClick = {
+                                            rteState.toggleParagraphStyle(ParagraphStyle(textAlign = TextAlign.Center))
+                                        },
+                                        onExportClick = {
+                                            onEvent(AddPostEvents.OnAddPost(context))
+                                        }
+                                    )
+
+                            }
+                            RichTextEditor(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .fillMaxHeight()
+                                    .padding(7.dp)
+                                    .weight(8f),
+                                state = rteState,
+                            )
                         }
-                        RichTextEditor(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(8f),
-                            state = rteState,
-                        )
                     }
                 }
             }
@@ -322,16 +465,29 @@ fun AddPostPage(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddPostTopBar(
-    onAddPost: () -> Unit,
+    onBack: () -> Unit,
     onSearch: () -> Unit,
+    title: String,
+    onChangeClick: (String) -> Unit
 ) {
     TopAppBar(
         title = {
-            Text(
-                text = "Add Post",
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.background
-            )
+
+                TextField(
+                    value = title,
+                    onValueChange = {
+                        onChangeClick(it)
+                    },
+                    label = {
+                        Text(text = "Title")
+                    },
+                    placeholder = {
+                        Text(text = "Add Title For Post")
+                    },
+                    shape = RoundedCornerShape(13.dp),
+                    maxLines = 1
+                )
+
         },
         actions = {
             IconButton(
@@ -340,32 +496,39 @@ private fun AddPostTopBar(
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = "Search",
-                    tint = MaterialTheme.colorScheme.background
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
+        },
+        navigationIcon = {
             IconButton(
-                onClick = onAddPost
-            ) {
+                onClick = onBack,
+
+                ) {
                 Icon(
-                    imageVector = Icons.Default.Save,
-                    contentDescription = "Add Post",
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
                     tint = MaterialTheme.colorScheme.background
                 )
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.background,
-            actionIconContentColor = MaterialTheme.colorScheme.background,
+            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         )
     )
 }
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalLayoutApi::class)
 @Composable
 fun EditorControls(
     modifier: Modifier = Modifier,
     state: RichTextState,
+    error: Boolean,
+    isImage: Boolean,
+    onChangeClick: (String) -> Unit,
+    imageVisible: Boolean,
+    onHideClick: () -> Unit,
     onBoldClick: () -> Unit,
     onItalicClick: () -> Unit,
     onUnderlineClick: () -> Unit,
@@ -390,29 +553,45 @@ fun EditorControls(
 
     var showLinkDialog by remember { mutableStateOf(false) }
 
-
-    FlowRow(
+    IconButton(
+        onClick = {
+            onHideClick()
+        }
+    ) {
+        Icon(
+            imageVector = Icons.Default.ArrowDownward,
+            contentDescription = ""
+        )
+    }
+    Column(
         modifier = modifier
-            .fillMaxWidth()
             .padding(all = 10.dp)
-            .padding(bottom = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = if (!imageVisible || !isImage) Arrangement.SpaceBetween else Arrangement.spacedBy(
+            3.dp
+        )
     ) {
         ControlWrapper(
             selected = boldSelected,
-            onChangeClick = { boldSelected = it },
+            onChangeClick = {
+                onChangeClick(state.toHtml())
+                boldSelected = it
+            },
             onClick = onBoldClick
         ) {
             Icon(
                 imageVector = Icons.Default.FormatBold,
                 contentDescription = "Bold Control",
-                tint = MaterialTheme.colorScheme.onPrimary
+                tint = MaterialTheme.colorScheme.primary
             )
         }
         ControlWrapper(
             selected = italicSelected,
-            onChangeClick = { italicSelected = it },
+            onChangeClick = {
+                onChangeClick(state.toHtml())
+                italicSelected = it
+            },
             onClick = onItalicClick
         ) {
             Icon(
@@ -423,7 +602,10 @@ fun EditorControls(
         }
         ControlWrapper(
             selected = underlineSelected,
-            onChangeClick = { underlineSelected = it },
+            onChangeClick = {
+                onChangeClick(state.toHtml())
+                underlineSelected = it
+            },
             onClick = onUnderlineClick
         ) {
             Icon(
@@ -434,7 +616,10 @@ fun EditorControls(
         }
         ControlWrapper(
             selected = titleSelected,
-            onChangeClick = { titleSelected = it },
+            onChangeClick = {
+                onChangeClick(state.toHtml())
+                titleSelected = it
+            },
             onClick = onTitleClick
         ) {
             Icon(
@@ -445,7 +630,10 @@ fun EditorControls(
         }
         ControlWrapper(
             selected = subtitleSelected,
-            onChangeClick = { subtitleSelected = it },
+            onChangeClick = {
+                onChangeClick(state.toHtml())
+                subtitleSelected = it
+            },
             onClick = onSubtitleClick
         ) {
             Icon(
@@ -456,7 +644,10 @@ fun EditorControls(
         }
         ControlWrapper(
             selected = textColorSelected,
-            onChangeClick = { textColorSelected = it },
+            onChangeClick = {
+                onChangeClick(state.toHtml())
+                textColorSelected = it
+            },
             onClick = onTextColorClick
         ) {
             Icon(
@@ -467,7 +658,10 @@ fun EditorControls(
         }
         ControlWrapper(
             selected = linkSelected,
-            onChangeClick = { linkSelected = it },
+            onChangeClick = {
+                onChangeClick(state.toHtml())
+                linkSelected = it
+            },
             onClick = { showLinkDialog = true }
         ) {
             Icon(
@@ -478,7 +672,10 @@ fun EditorControls(
         }
         ControlWrapper(
             selected = alignmentSelected == 0,
-            onChangeClick = { alignmentSelected = 0 },
+            onChangeClick = {
+                onChangeClick(state.toHtml())
+                alignmentSelected = 0
+            },
             onClick = onStartAlignClick
         ) {
             Icon(
@@ -489,7 +686,10 @@ fun EditorControls(
         }
         ControlWrapper(
             selected = alignmentSelected == 1,
-            onChangeClick = { alignmentSelected = 1 },
+            onChangeClick = {
+                onChangeClick(state.toHtml())
+                alignmentSelected = 1
+            },
             onClick = onCenterAlignClick
         ) {
             Icon(
@@ -500,7 +700,10 @@ fun EditorControls(
         }
         ControlWrapper(
             selected = alignmentSelected == 2,
-            onChangeClick = { alignmentSelected = 2 },
+            onChangeClick = {
+                onChangeClick(state.toHtml())
+                alignmentSelected = 2
+            },
             onClick = onEndAlignClick
         ) {
             Icon(
@@ -513,6 +716,7 @@ fun EditorControls(
             selected = true,
             selectedColor = MaterialTheme.colorScheme.tertiary,
             onChangeClick = { },
+            error = error,
             onClick = onExportClick
         ) {
             Icon(
@@ -524,9 +728,11 @@ fun EditorControls(
     }
 }
 
+
 @Composable
 private fun ControlWrapper(
     selected: Boolean,
+    error: Boolean = false,
     selectedColor: Color = MaterialTheme.colorScheme.primary,
     unselectedColor: Color = MaterialTheme.colorScheme.inversePrimary,
     onChangeClick: (Boolean) -> Unit,
@@ -541,8 +747,8 @@ private fun ControlWrapper(
                 onChangeClick(!selected)
             }
             .background(
-                if (selected) selectedColor
-                else unselectedColor
+                if (!error) if (selected) selectedColor else unselectedColor
+                else MaterialTheme.colorScheme.errorContainer
             )
             .border(
                 width = 1.dp,
