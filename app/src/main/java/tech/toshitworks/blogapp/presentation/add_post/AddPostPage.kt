@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -86,6 +87,7 @@ import androidx.navigation.NavHostController
 import com.mohamedrejeb.richeditor.model.RichTextState
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichTextEditor
+import tech.toshitworks.blogapp.presentation.components.AddCategoryDialog
 import tech.toshitworks.blogapp.presentation.components.ImageHolder
 import tech.toshitworks.blogapp.utils.Routes
 import tech.toshitworks.blogapp.utils.SnackBarEvent
@@ -98,6 +100,9 @@ fun AddPostPage(
     navController: NavHostController
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    var isDialogOpen by rememberSaveable {
+        mutableStateOf(false)
+    }
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val onEvent = viewModel::onEvent
     val focusRequester = remember {
@@ -137,6 +142,26 @@ fun AddPostPage(
             }
         }
     }
+    AddCategoryDialog(
+        isOpen = isDialogOpen,
+        onDismissRequest = {
+            isDialogOpen = false
+        },
+        onConfirmButtonClick = {
+            isDialogOpen = false
+        },
+        title = state.commentTitle,
+        description = state.commentBody,
+        onTitleNameChange = {
+            println(it)
+            println(state.commentTitle)
+            println("koo")
+            onEvent(AddPostEvents.OnCommentTitleChange(it))
+        },
+        onDescriptionChange = {
+            onEvent(AddPostEvents.OnCommentBodyChange(it))
+        }
+    )
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -272,6 +297,7 @@ fun AddPostPage(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(pv)
+                            .imePadding()
                     ) {
                         Card(
                             modifier = Modifier
@@ -285,7 +311,7 @@ fun AddPostPage(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    text = if (state.selectedCategory == null) "Select a category add your own" else state.selectedCategory?.title
+                                    text = if (state.selectedCategory == null) "Select a category or add your own" else state.selectedCategory?.title
                                         ?: "",
                                     color = if (state.selectedCategory == null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onPrimaryContainer,
                                     fontSize = 20.sp
@@ -295,7 +321,7 @@ fun AddPostPage(
                                         if(state.selectedCategory == null)
                                             IconButton(
                                                 onClick = {
-
+                                                    isDialogOpen = true
                                                 }
                                             ) {
                                                 Icon(
@@ -409,9 +435,6 @@ fun AddPostPage(
                                         isImage = state.image != null,
                                         imageVisible = state.showImage,
                                         error = state.error.isNotEmpty(),
-                                        onChangeClick = {s->
-                                            onEvent(AddPostEvents.OnContentChange(s))
-                                        },
                                         onBoldClick = {
                                             rteState.toggleSpanStyle(SpanStyle(fontWeight = FontWeight.Bold))
                                         },
@@ -440,7 +463,7 @@ fun AddPostPage(
                                             rteState.toggleParagraphStyle(ParagraphStyle(textAlign = TextAlign.Center))
                                         },
                                         onExportClick = {
-                                            onEvent(AddPostEvents.OnAddPost(context))
+                                            onEvent(AddPostEvents.OnAddPost(rteState.toHtml(),context))
                                         }
                                     )
 
@@ -508,7 +531,7 @@ private fun AddPostTopBar(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.background
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         },
@@ -526,7 +549,6 @@ fun EditorControls(
     state: RichTextState,
     error: Boolean,
     isImage: Boolean,
-    onChangeClick: (String) -> Unit,
     imageVisible: Boolean,
     onHideClick: () -> Unit,
     onBoldClick: () -> Unit,
@@ -575,7 +597,6 @@ fun EditorControls(
         ControlWrapper(
             selected = boldSelected,
             onChangeClick = {
-                onChangeClick(state.toHtml())
                 boldSelected = it
             },
             onClick = onBoldClick
@@ -589,7 +610,6 @@ fun EditorControls(
         ControlWrapper(
             selected = italicSelected,
             onChangeClick = {
-                onChangeClick(state.toHtml())
                 italicSelected = it
             },
             onClick = onItalicClick
@@ -603,7 +623,6 @@ fun EditorControls(
         ControlWrapper(
             selected = underlineSelected,
             onChangeClick = {
-                onChangeClick(state.toHtml())
                 underlineSelected = it
             },
             onClick = onUnderlineClick
@@ -617,7 +636,6 @@ fun EditorControls(
         ControlWrapper(
             selected = titleSelected,
             onChangeClick = {
-                onChangeClick(state.toHtml())
                 titleSelected = it
             },
             onClick = onTitleClick
@@ -631,7 +649,6 @@ fun EditorControls(
         ControlWrapper(
             selected = subtitleSelected,
             onChangeClick = {
-                onChangeClick(state.toHtml())
                 subtitleSelected = it
             },
             onClick = onSubtitleClick
@@ -645,7 +662,6 @@ fun EditorControls(
         ControlWrapper(
             selected = textColorSelected,
             onChangeClick = {
-                onChangeClick(state.toHtml())
                 textColorSelected = it
             },
             onClick = onTextColorClick
@@ -659,7 +675,6 @@ fun EditorControls(
         ControlWrapper(
             selected = linkSelected,
             onChangeClick = {
-                onChangeClick(state.toHtml())
                 linkSelected = it
             },
             onClick = { showLinkDialog = true }
@@ -673,7 +688,6 @@ fun EditorControls(
         ControlWrapper(
             selected = alignmentSelected == 0,
             onChangeClick = {
-                onChangeClick(state.toHtml())
                 alignmentSelected = 0
             },
             onClick = onStartAlignClick
@@ -687,7 +701,6 @@ fun EditorControls(
         ControlWrapper(
             selected = alignmentSelected == 1,
             onChangeClick = {
-                onChangeClick(state.toHtml())
                 alignmentSelected = 1
             },
             onClick = onCenterAlignClick
@@ -701,7 +714,6 @@ fun EditorControls(
         ControlWrapper(
             selected = alignmentSelected == 2,
             onChangeClick = {
-                onChangeClick(state.toHtml())
                 alignmentSelected = 2
             },
             onClick = onEndAlignClick

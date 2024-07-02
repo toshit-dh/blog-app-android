@@ -70,4 +70,26 @@ interface BlogApi {
         @Path("id") id: Int,
     ): Response<PostBodyDto>
 
+    @POST(Constants.ADD_COMMENT)
+    suspend fun addComment(
+        @Path("id") id: Int,
+        @Body commentBodyDto: CommentBodyDto
+    ): Response<CommentBodyDto>
+
+    @GET(Constants.USER_BY_ID)
+    suspend fun getUser(
+        @Path("id") id: Int
+    ): Response<UserDto>
+
+    @POST(Constants.CATEGORY_ADD)
+    suspend fun addCategory(
+        @Body categoryBodyDto: CategoryBodyDto
+    ): Response<CategoryBodyDto>
+
+    @GET(Constants.POST_BY_USER)
+    suspend fun getPostByUser(
+        @Path("id") id: Int
+    ): Response<List<PostBodyDto>>
+
+
 }

@@ -9,9 +9,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import tech.toshitworks.blogapp.data.mapper.toCommentBody
+import tech.toshitworks.blogapp.data.mapper.toCommentBodyDto
 import tech.toshitworks.blogapp.data.mapper.toPostBody
 import tech.toshitworks.blogapp.domain.BlogAppRepository
+import tech.toshitworks.blogapp.domain.model.CommentBody
+import tech.toshitworks.blogapp.domain.model.User
 import tech.toshitworks.blogapp.presentation.home.HomeStates
+import tech.toshitworks.blogapp.utils.Resource
 import javax.inject.Inject
 
 @HiltViewModel
@@ -48,7 +52,30 @@ class PostViewModel @Inject constructor(
             }
 
             PostEvents.OnCommentSend -> {
+                viewModelScope.launch {
+                    val comment = blogAppRepository.addComment(state.value.postBody.id!!,CommentBody(
+                        content = state.value.comment,
+                        user = User("",0,"")
+                    ).toCommentBodyDto())
+                    when (comment){
+                        is Resource.Error -> {
 
+                        }
+                        is Resource.Loading -> {
+
+                        }
+                        is Resource.Success -> {
+                            val commentBody = comment.data!!.toCommentBody()
+                            val comments = state.value.comments.toMutableList()
+                            comments.add(commentBody)
+                            _state.update {
+                                it.copy(
+                                    comments = comments
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }

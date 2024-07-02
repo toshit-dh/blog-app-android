@@ -5,7 +5,6 @@ import tech.toshitworks.blogapp.domain.model.CategoryBody
 
 data class AddPostStates (
     val searchQuery: String = "",
-    val content: String = "",
     val title: String = "",
     val image: Uri? = null,
     val isSearchBarVisible: Boolean = false,
@@ -14,7 +13,9 @@ data class AddPostStates (
     val error: Array<String> = arrayOf(TITLE_SIZE, CATEGORY_THERE, BODY_SIZE),
     val showEditorControls: Boolean = true,
     val showImage: Boolean = true,
-    val postId: Int? = null
+    val postId: Int? = null,
+    val commentTitle: String = "y",
+    val commentBody: String = "",
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -23,7 +24,6 @@ data class AddPostStates (
         other as AddPostStates
 
         if (searchQuery != other.searchQuery) return false
-        if (content != other.content) return false
         if (title != other.title) return false
         if (image != other.image) return false
         if (isSearchBarVisible != other.isSearchBarVisible) return false
@@ -38,7 +38,6 @@ data class AddPostStates (
 
     override fun hashCode(): Int {
         var result = searchQuery.hashCode()
-        result = 31 * result + content.hashCode()
         result = 31 * result + title.hashCode()
         result = 31 * result + (image?.hashCode() ?: 0)
         result = 31 * result + isSearchBarVisible.hashCode()

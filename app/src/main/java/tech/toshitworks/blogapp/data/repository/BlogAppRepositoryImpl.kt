@@ -10,6 +10,7 @@ import tech.toshitworks.blogapp.data.remote.PostBodyDto
 import tech.toshitworks.blogapp.data.remote.PostResponseBodyDto
 import tech.toshitworks.blogapp.data.remote.SignUpBodyDto
 import tech.toshitworks.blogapp.data.remote.TokenDto
+import tech.toshitworks.blogapp.data.remote.UserDto
 import tech.toshitworks.blogapp.domain.BlogAppRepository
 import tech.toshitworks.blogapp.utils.Resource
 import java.net.HttpRetryException
@@ -103,6 +104,58 @@ class BlogAppRepositoryImpl @Inject constructor(
     ): Resource<PostBodyDto> {
         return try {
             val response = blogApi.addPost(file,postBodyDto, id)
+            Resource.Success(response.body())
+        }catch (e: IOException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }catch (e: HttpRetryException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }
+    }
+
+    override suspend fun addComment(id: Int,commentBodyDto: CommentBodyDto): Resource<CommentBodyDto> {
+        return try {
+            val response = blogApi.addComment(id,commentBodyDto)
+            Resource.Success(response.body())
+        }catch (e: IOException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }catch (e: HttpRetryException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }
+    }
+
+    override suspend fun getUserById(id: Int): Resource<UserDto> {
+        return try {
+            val response = blogApi.getUser(id)
+            Resource.Success(response.body())
+        }catch (e: IOException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }catch (e: HttpRetryException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }
+    }
+
+    override suspend fun addCategory(categoryBodyDto: CategoryBodyDto): Resource<CategoryBodyDto> {
+        return try {
+            val response = blogApi.addCategory(categoryBodyDto)
+            Resource.Success(response.body())
+        }catch (e: IOException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }catch (e: HttpRetryException){
+            e.printStackTrace()
+            Resource.Error("Couldn't load data ${e.message}")
+        }
+    }
+
+    override suspend fun getPostsByUserID(id: Int): Resource<List<PostBodyDto>> {
+        return try {
+            val response = blogApi.getPostByUser(id)
             Resource.Success(response.body())
         }catch (e: IOException){
             e.printStackTrace()

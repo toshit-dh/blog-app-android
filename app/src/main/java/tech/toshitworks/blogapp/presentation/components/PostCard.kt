@@ -18,6 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.mohamedrejeb.richeditor.model.rememberRichTextState
+import com.mohamedrejeb.richeditor.ui.material3.RichText
 import tech.toshitworks.blogapp.domain.model.PostBody
 import tech.toshitworks.blogapp.utils.Constants
 import tech.toshitworks.blogapp.utils.dateFormatter
@@ -30,6 +32,8 @@ fun PostCard(
     fullPost: (Int) -> Unit,
     seeUser: (Int) -> Unit
 ) {
+    val rtState = rememberRichTextState()
+    rtState.setHtml(postBody.content)
     val date = dateFormatter(postBody.date)
     Card(
         modifier = modifier
@@ -83,8 +87,8 @@ fun PostCard(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = postBody.content,
+            RichText(
+                state = rtState,
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,

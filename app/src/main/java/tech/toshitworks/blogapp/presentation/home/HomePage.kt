@@ -235,6 +235,7 @@ fun HomePage(
                                 onCategorySelected = {
                                     coroutineScope.launch {
                                         pagerState.animateScrollToPage(it)
+                                        onEvent(HomeEvents.OnCategoryChanged(it))
                                     }
                                 }
                             )
@@ -317,8 +318,8 @@ private fun HomeScreenTopBar(
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.background,
-            actionIconContentColor = MaterialTheme.colorScheme.background,
+            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+            actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
         )
     )
 }

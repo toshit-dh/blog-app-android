@@ -45,7 +45,7 @@ class AddPostViewModel @Inject constructor(
 
     private var searchJob: Job? = null
 
-    private fun updateError() {
+    private fun updateError(content: String) {
         val errorMessages = mutableListOf<String>()
         if (state.value.title.isEmpty() || state.value.title.length !in 10..100) {
             errorMessages.add(TITLE_SIZE)
@@ -53,9 +53,8 @@ class AddPostViewModel @Inject constructor(
         if (state.value.selectedCategory == null) {
             errorMessages.add(CATEGORY_THERE)
         }
-        println("hi ${state.value.content.length}")
-        if (state.value.content.isEmpty() || state.value.content.length !in 100..10000) {
-            println("hi ${state.value.content.length}")
+        println("hi ${content.length}")
+        if (content.isEmpty() || content.length !in 100..10000) {
             errorMessages.add(BODY_SIZE)
         }
         _state.update {
@@ -94,7 +93,7 @@ class AddPostViewModel @Inject constructor(
         when (event) {
             is AddPostEvents.OnAddPost -> {
                 viewModelScope.launch {
-                    updateError()
+                    updateError(event.content)
                     if (state.value.error.isNotEmpty()) {
                         var error = ""
                         state.value.error.map {
@@ -108,9 +107,10 @@ class AddPostViewModel @Inject constructor(
                     } else {
                         viewModelScope.launch {
                             val id = state.value.selectedCategory!!.id
+                            val content = event.content
                             val postBody = PostBody(
                                 title = state.value.title,
-                                content = state.value.content,
+                                content = content,
                                 user = User("", 0, "")
                             )
                             val contentUri = state.value.image // Assuming this is your content URI
@@ -174,12 +174,6 @@ class AddPostViewModel @Inject constructor(
                 }
             }
 
-            is AddPostEvents.OnContentChange -> {
-                _state.update {
-                    it.copy(content = event.content)
-                }
-            }
-
             AddPostEvents.OnSearchIconClick -> {
                 _state.update {
                     it.copy(isSearchBarVisible = true)
@@ -238,6 +232,22 @@ class AddPostViewModel @Inject constructor(
             is AddPostEvents.OnTitleChange -> {
                 _state.update {
                     it.copy(title = event.title)
+                }
+            }
+
+            is AddPostEvents.OnCommentBodyChange -> {
+                _state.update {
+                    it.copy(
+                        commentBody = event.body
+                    )
+                }
+            }
+
+            is AddPostEvents.OnCommentTitleChange -> {
+                _state.update {
+                    it.copy(
+                        commentTitle = event.title
+                    )
                 }
             }
         }

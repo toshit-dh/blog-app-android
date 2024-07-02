@@ -78,6 +78,7 @@ fun PostPage(
         },
         onSend = {
             onEvent(PostEvents.OnCommentSend)
+            onEvent(PostEvents.OnCommentChange(""))
         },
         onCommentChange = {
             onEvent(PostEvents.OnCommentChange(it))
@@ -176,13 +177,13 @@ private fun PostTopAppBar(
                         overflow = TextOverflow.Ellipsis,
                         text = title,
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.background
+
                     )
                     Text(
                         modifier = Modifier
                             .weight(1f),
                         text = date,
-                        color = MaterialTheme.colorScheme.background
+
                     )
                 }
             }
@@ -195,7 +196,6 @@ private fun PostTopAppBar(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.background
                 )
             }
         },
@@ -208,14 +208,14 @@ private fun PostTopAppBar(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.Comment,
                     contentDescription = "Comment",
-                    tint = MaterialTheme.colorScheme.background
+
                 )
             }
         },
         colors = TopAppBarDefaults.largeTopAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+            actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
         ),
         scrollBehavior = scrollBehavior
     )
