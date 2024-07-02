@@ -101,7 +101,7 @@ fun AddCategoryDialog(
                     enabled = titleError == null && descriptionError == null
                 ) {
                     Text(
-                        text = "Save"
+                        text = "Add"
                     )
                 }
             },

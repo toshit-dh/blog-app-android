@@ -21,6 +21,7 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import tech.toshitworks.blogapp.data.mapper.toCategoryBody
 import tech.toshitworks.blogapp.data.mapper.toPostBodyDto
+import tech.toshitworks.blogapp.data.remote.CategoryBodyDto
 import tech.toshitworks.blogapp.domain.BlogAppRepository
 import tech.toshitworks.blogapp.domain.model.PostBody
 import tech.toshitworks.blogapp.domain.model.User
@@ -127,7 +128,7 @@ class AddPostViewModel @Inject constructor(
                             val post = blogAppRepository.addPost(
                                 filePart,
                                 postBody.toPostBodyDto(),
-                                id
+                                id!!
                             )
                             when (post) {
                                 is Resource.Error -> {
@@ -248,6 +249,32 @@ class AddPostViewModel @Inject constructor(
                     it.copy(
                         commentTitle = event.title
                     )
+                }
+            }
+
+            AddPostEvents.OnAddCategory -> {
+                viewModelScope.launch {
+                    val category = blogAppRepository.addCategory(
+                        CategoryBodyDto(
+                            title = state.value.commentTitle,
+                            description = state.value.commentBody
+                        )
+                    )
+                    when(category){
+                        is Resource.Error -> {
+
+                        }
+                        is Resource.Loading -> {
+
+                        }
+                        is Resource.Success -> {
+                            _state.update {
+                                it.copy(
+                                    selectedCategory = category.data?.toCategoryBody()
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

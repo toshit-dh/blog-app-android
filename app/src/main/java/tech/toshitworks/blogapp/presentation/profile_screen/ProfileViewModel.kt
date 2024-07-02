@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import tech.toshitworks.blogapp.data.mapper.toPostBody
 import tech.toshitworks.blogapp.data.mapper.toUser
 import tech.toshitworks.blogapp.domain.BlogAppRepository
+import tech.toshitworks.blogapp.utils.Resource
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,13 +31,32 @@ class ProfileViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             _isLoading.value = true
-            val user = blogAppRepository.getUserById(id).data!!.toUser()
-            val posts = blogAppRepository.getPostsByUserID(id).data!!.map {
-                it.toPostBody()
+            when (val user = blogAppRepository.getUserById(id)){
+                is Resource.Error -> {
+
+                }
+                is Resource.Loading -> {
+
+                }
+                is Resource.Success -> {
+                    _state.update {
+                        it.copy(user = user.data!!.toUser())
+                    }
+                }
             }
-            _state.update {
-                it.copy(user = user, posts = posts)
-            }
+            when (val posts = blogAppRepository.getPostsByUserID(id)){
+                is Resource.Error -> {
+
+                }
+                is Resource.Loading -> {
+
+                }
+                is Resource.Success -> {
+                    _state.update { states ->
+                        states.copy(posts = posts.data!!.map { it.toPostBody() })
+                }
+
+                }                }
             _isLoading.value = false
         }
     }

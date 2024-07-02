@@ -185,7 +185,7 @@ fun HomePage(
                             HomeScreenTopBar(
                                 scrollBehavior = scrollBehavior,
                                 onProfile = {
-                                    navController.navigate(Routes.ProfileScreen.route)
+                                    navController.navigate("${Routes.ProfileScreen.route}/0");
                                 },
                                 onSearch = {
                                     coroutineScope.launch {

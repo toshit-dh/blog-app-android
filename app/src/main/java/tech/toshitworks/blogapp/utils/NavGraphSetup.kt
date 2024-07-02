@@ -19,6 +19,8 @@ import tech.toshitworks.blogapp.presentation.login.LoginViewModel
 import tech.toshitworks.blogapp.presentation.onboarding.OnBoardingPage
 import tech.toshitworks.blogapp.presentation.post.PostPage
 import tech.toshitworks.blogapp.presentation.post.PostViewModel
+import tech.toshitworks.blogapp.presentation.profile_screen.ProfilePage
+import tech.toshitworks.blogapp.presentation.profile_screen.ProfileViewModel
 import tech.toshitworks.blogapp.presentation.sign_up.SignUpPage
 import tech.toshitworks.blogapp.presentation.sign_up.SignUpViewModel
 import tech.toshitworks.blogapp.presentation.splash_screen.SplashScreenPage
@@ -86,6 +88,13 @@ fun NavGraphSetup(
         ){
             val viewModel: PostViewModel = hiltViewModel()
             PostPage(
+                viewModel = viewModel,
+                navController = navController
+            )
+        }
+        composable("${Routes.ProfileScreen.route}/{id}"){
+            val viewModel: ProfileViewModel = hiltViewModel()
+            ProfilePage(
                 viewModel = viewModel,
                 navController = navController
             )

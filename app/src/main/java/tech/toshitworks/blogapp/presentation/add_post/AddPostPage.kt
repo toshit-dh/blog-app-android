@@ -148,14 +148,12 @@ fun AddPostPage(
             isDialogOpen = false
         },
         onConfirmButtonClick = {
+            onEvent(AddPostEvents.OnAddCategory)
             isDialogOpen = false
         },
         title = state.commentTitle,
         description = state.commentBody,
         onTitleNameChange = {
-            println(it)
-            println(state.commentTitle)
-            println("koo")
             onEvent(AddPostEvents.OnCommentTitleChange(it))
         },
         onDescriptionChange = {

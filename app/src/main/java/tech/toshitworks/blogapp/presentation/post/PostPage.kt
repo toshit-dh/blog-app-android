@@ -71,7 +71,7 @@ fun PostPage(
         isOpen = isBottomSheetOpen,
         comments = state.comments,
         onNameClick = {
-            navController.navigate(Routes.ProfileScreen.route)
+            navController.navigate("${Routes.ProfileScreen.route}/$it")
         },
         onDismissRequest = {
             isBottomSheetOpen = false
@@ -95,7 +95,7 @@ fun PostPage(
                         navController.navigateUp()
                     },
                     onName = {
-                        navController.navigate(Routes.ProfileScreen.route)
+                        navController.navigate("${Routes.ProfileScreen.route}/$it")
                     },
                     scrollBehavior = scrollBehavior,
                     isBottomSheetVisible = {
@@ -196,6 +196,7 @@ private fun PostTopAppBar(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         },

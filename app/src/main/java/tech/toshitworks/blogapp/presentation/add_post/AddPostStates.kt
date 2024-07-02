@@ -14,7 +14,7 @@ data class AddPostStates (
     val showEditorControls: Boolean = true,
     val showImage: Boolean = true,
     val postId: Int? = null,
-    val commentTitle: String = "y",
+    val commentTitle: String = "",
     val commentBody: String = "",
 ) {
     override fun equals(other: Any?): Boolean {
@@ -32,6 +32,9 @@ data class AddPostStates (
         if (!error.contentEquals(other.error)) return false
         if (showEditorControls != other.showEditorControls) return false
         if (showImage != other.showImage) return false
+        if (postId != other.postId) return false
+        if (commentTitle != other.commentTitle) return false
+        if (commentBody != other.commentBody) return false
 
         return true
     }
@@ -46,8 +49,12 @@ data class AddPostStates (
         result = 31 * result + error.contentHashCode()
         result = 31 * result + showEditorControls.hashCode()
         result = 31 * result + showImage.hashCode()
+        result = 31 * result + (postId ?: 0)
+        result = 31 * result + commentTitle.hashCode()
+        result = 31 * result + commentBody.hashCode()
         return result
     }
+
 }
 
 const val TITLE_SIZE = "Title cannot be empty and must be between 10 and 100 characters.\n"

@@ -18,4 +18,5 @@ sealed class AddPostEvents{
     data class OnTitleChange(val title: String): AddPostEvents()
     data class OnCommentTitleChange(val title: String): AddPostEvents()
     data class OnCommentBodyChange(val body: String): AddPostEvents()
+    data object OnAddCategory: AddPostEvents()
 }
