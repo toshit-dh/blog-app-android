@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import tech.toshitworks.blogapp.data.datastore.PreferenceManager
 import tech.toshitworks.blogapp.data.mapper.toPostBody
 import tech.toshitworks.blogapp.data.mapper.toUser
 import tech.toshitworks.blogapp.domain.BlogAppRepository
@@ -17,12 +18,13 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val blogAppRepository: BlogAppRepository,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val preferenceManager: PreferenceManager
 ): ViewModel(){
 
     val id = savedStateHandle.get<String>("id")!!.toInt()
 
-    private val _state = MutableStateFlow(ProfileStates())
+    private val _state = MutableStateFlow(ProfileStates(id == 0))
     val state = _state.asStateFlow()
 
     private val _isLoading = MutableStateFlow(true)
@@ -58,6 +60,16 @@ class ProfileViewModel @Inject constructor(
 
                 }                }
             _isLoading.value = false
+        }
+    }
+
+    fun onEvent(event: ProfileEvents){
+        when(event){
+            ProfileEvents.OnLogout -> {
+                viewModelScope.launch {
+                    preferenceManager.deleteToken()
+                }
+            }
         }
     }
 

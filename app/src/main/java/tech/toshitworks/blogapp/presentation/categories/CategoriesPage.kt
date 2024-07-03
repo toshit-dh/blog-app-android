@@ -134,7 +134,7 @@ fun CategoryPage(
                     onClick = {
                         onEvent(CategoryEvents.SaveCategory)
                         navController.popBackStack()
-                        navController.navigate(Routes.OnBoardingScreen.route)
+                        navController.navigate(Routes.HomeScreen.route)
                     },
                     enabled = state.categorySelected.size in 5..20,
                     modifier = Modifier.weight(1f)

@@ -174,6 +174,7 @@ private fun PostTopAppBar(
                     Text(
                         modifier = Modifier
                             .weight(2f),
+                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         text = title,
                         fontWeight = FontWeight.SemiBold,

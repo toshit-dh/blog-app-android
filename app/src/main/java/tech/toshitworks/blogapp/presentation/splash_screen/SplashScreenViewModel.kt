@@ -26,13 +26,12 @@ class SplashScreenViewModel @Inject constructor(
     val screenState: State<String> = _screenRoute
     init {
         viewModelScope.launch {
-            preferenceManager.saveOnboardingViewed()
             preferenceManager.getOnboardingViewed().collect {
+                println("view $it")
                 if (it == true) {
                     val isVerified = blogAppRepository.verify().data ?: false
                     if (isVerified) {
                         val categoryViewed = preferenceManager.getCategories().first()
-                        println("hi $categoryViewed ${categoryViewed.isNotEmpty()} ${categoryViewed.size in 5.. 20}")
                         if (categoryViewed.isNotEmpty() && categoryViewed.size in 5..20) {
                             _screenRoute.value = Routes.HomeScreen.route
                         } else {

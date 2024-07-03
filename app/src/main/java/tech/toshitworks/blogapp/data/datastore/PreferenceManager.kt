@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface PreferenceManager {
     suspend fun saveToken(token: String)
+    suspend fun deleteToken()
     fun getToken(): Flow<String?>
 
 

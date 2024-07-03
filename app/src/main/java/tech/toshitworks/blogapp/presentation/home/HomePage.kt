@@ -103,9 +103,7 @@ fun HomePage(
 
         }
     LaunchedEffect(key1 = pagerState) {
-        println("invnoked")
-        if(!isLoading) {
-            println("kefy")
+        if (!isLoading) {
             snapshotFlow { pagerState.currentPage }.collect {
                 onEvent(HomeEvents.OnCategoryChanged(it))
             }
@@ -166,12 +164,15 @@ fun HomePage(
                                     items(state.posts) {
                                         PostCard(
                                             postBody = it,
-                                            fullPost = {id->
+                                            fullPost = { id ->
                                                 navController.navigate("${Routes.PostScreen.route}/$id")
                                             },
-                                            seeUser = {
-                                                navController.navigate(Routes.ProfileScreen.route)
-                                            }
+
+                                            seeUser = {id->
+                                                navController.navigate("${Routes.ProfileScreen.route}/$id")
+                                            },
+
+                                            inProfile = false
                                         )
                                     }
                                 }
@@ -185,7 +186,7 @@ fun HomePage(
                             HomeScreenTopBar(
                                 scrollBehavior = scrollBehavior,
                                 onProfile = {
-                                    navController.navigate("${Routes.ProfileScreen.route}/0");
+                                    navController.navigate("${Routes.ProfileScreen.route}/0")
                                 },
                                 onSearch = {
                                     coroutineScope.launch {
@@ -248,12 +249,13 @@ fun HomePage(
                                     items(state.posts) { a ->
                                         PostCard(
                                             postBody = a,
-                                            fullPost = {id->
+                                            fullPost = { id ->
                                                 navController.navigate("${Routes.PostScreen.route}/$id")
                                             },
                                             seeUser = {
-                                                navController.navigate(Routes.ProfileScreen.route)
-                                            }
+                                                navController.navigate("${Routes.ProfileScreen.route}/$it")
+                                            },
+                                            inProfile = false
                                         )
                                     }
                                 }
@@ -264,21 +266,21 @@ fun HomePage(
                 }
             }
         }
-    }else{
+    } else {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-                Text(
-                    modifier = Modifier
-                        .align(Alignment.Center),
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontSize = 40.sp
-                    ),
-                    text = "Loading..."
-                )
+            Text(
+                modifier = Modifier
+                    .align(Alignment.Center),
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontSize = 40.sp
+                ),
+                text = "Loading..."
+            )
         }
     }
 }

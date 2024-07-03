@@ -30,7 +30,8 @@ fun PostCard(
     modifier: Modifier = Modifier,
     postBody: PostBody,
     fullPost: (Int) -> Unit,
-    seeUser: (Int) -> Unit
+    seeUser: (Int) -> Unit,
+    inProfile: Boolean
 ) {
     val rtState = rememberRichTextState()
     rtState.setHtml(postBody.content)
@@ -56,15 +57,16 @@ fun PostCard(
                     .padding(bottom = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    modifier = Modifier
-                        .clickable {
-                            seeUser(postBody.user.id)
-                        },
-                    text = postBody.user.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                if(!inProfile)
+                    Text(
+                        modifier = Modifier
+                            .clickable {
+                                seeUser(postBody.user.id)
+                            },
+                        text = postBody.user.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 Text(
                     text = date,
                     style = MaterialTheme.typography.bodyMedium,

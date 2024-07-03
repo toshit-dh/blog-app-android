@@ -16,6 +16,12 @@ class DataStoreManager @Inject constructor(
         }
     }
 
+    override suspend fun deleteToken() {
+        dataStore.edit {
+            it.remove(PreferencesKey.TOKEN)
+        }
+    }
+
     override fun getToken(): Flow<String?> {
         return dataStore.data.map {
             it[PreferencesKey.TOKEN]

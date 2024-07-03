@@ -14,6 +14,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,9 +39,10 @@ import tech.toshitworks.blogapp.utils.Routes
 @Composable
 fun ProfilePage(
     viewModel: ProfileViewModel,
-    navController: NavHostController
+    navController: NavHostController,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val onEvent = viewModel::onEvent
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     Scaffold(
         topBar = {
@@ -57,7 +60,6 @@ fun ProfilePage(
                         onClick = {
                             navController.navigateUp()
                         },
-
                         ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -66,6 +68,17 @@ fun ProfilePage(
                         )
                     }
                 },
+                actions = {
+                    if(state.self)
+                        IconButton(
+                            onClick = {
+                                onEvent(ProfileEvents.OnLogout)
+                                navController.navigate(Routes.LoginScreen.route)
+                            }
+                        ) {
+                            Icon(imageVector = Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout")
+                        }
+                }
             )
         }
     ) {
@@ -110,7 +123,8 @@ fun ProfilePage(
                         },
                         seeUser = {
                             navController.navigate(Routes.ProfileScreen.route)
-                        }
+                        },
+                        inProfile = true
                     )
                 }
             }
