@@ -1,10 +1,5 @@
 # Blog App Android Project
 
-![GitHub repo size](https://img.shields.io/github/repo-size/toshit-dh/blog-app-android)
-![GitHub issues](https://img.shields.io/github/issues/toshit-dh/blog-app-android)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/toshit-dh/blog-app-android)
-![GitHub](https://img.shields.io/github/license/toshit-dh/blog-app-android)
-
 Welcome to the Blog App Android Project repository! This project utilizes Jetpack Compose for building a modern Android blogging application.
 
 ## Features
@@ -22,8 +17,8 @@ Welcome to the Blog App Android Project repository! This project utilizes Jetpac
 
 ### Prerequisites
 
-- Android Studio Arctic Fox or newer
-- Kotlin 1.5.0 or newer
+- Android Studio
+- Kotlin 1.5.0 
 
 ### Getting Started
 
@@ -56,13 +51,13 @@ For more details, please refer to the [Blog App Backend](https://github.com/tosh
 
 ## Screenshots
 
-![Screenshot 1](screenshots/signup.jpg)
-![Screenshot 2](screenshots/login.jpg)
-![Screenshot 3](screenshots/onboarding.jpg)
-![Screenshot 4](screenshots/category.jpg)
-![Screenshot 5](screenshots/home.jpg)
-![Screenshot 6](screenshots/post.jpg)
-![Screenshot 7](screenshots/comment.jpg)
-![Screenshot 8](screenshots/addpost.jpg)
-![Screenshot 9](screenshots/profile.jpg)
+<img src="screenshots/signup.jpg" alt="Screenshot 1" width="250" />
+<img src="screenshots/login.jpg" alt="Screenshot 2" width="250" />
+<img src="screenshots/onboarding.jpg" alt="Screenshot 3" width="250" />
+<img src="screenshots/category.jpg" alt="Screenshot 4" width="250" />
+<img src="screenshots/home.jpg" alt="Screenshot 5" width="250" />
+<img src="screenshots/post.jpg" alt="Screenshot 6" width="250" />
+<img src="screenshots/comment.jpg" alt="Screenshot 7" width="250" />
+<img src="screenshots/addpost.jpg" alt="Screenshot 8" width="250" />
+<img src="screenshots/profile.jpg" alt="Screenshot 9" width="250" />
 
