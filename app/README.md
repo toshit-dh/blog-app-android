@@ -1,1 +1,0 @@
-C:\Users\mstdh\Documents\Developments\AndroidDevelopment(Native)\Apps\JetpackCompose\BlogApp\app\README.md
