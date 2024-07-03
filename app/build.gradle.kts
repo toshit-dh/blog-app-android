@@ -82,7 +82,6 @@ dependencies {
 
     implementation(libs.androidx.material.icons.extended)
 
-    // DataStore
     implementation(libs.androidx.datastore.preferences)
     ksp(libs.androidx.datastore.preferences)
 
