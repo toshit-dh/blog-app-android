@@ -32,7 +32,6 @@ fun Categories(
         category.add(0,CategoryBody(0,"","General"))
         if (categories.isNotEmpty())
             category.forEachIndexed { index, c ->
-                println("hi")
                 Tab(
                     content = {
                         Text(

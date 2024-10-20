@@ -84,7 +84,7 @@ fun LoginPage(
                         duration = it.duration
                     )
                     navController.popBackStack()
-                    navController.navigate(Routes.OnBoardingScreen.route)
+                    navController.navigate(Routes.CategoryScreen.route)
                 }
 
                 is SnackBarEvent.ShowPostSnackBar -> {

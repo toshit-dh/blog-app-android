@@ -34,6 +34,7 @@ class HomeViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             val categories = preferenceManager.getCategories().first()
+            println(categories)
             val categoryBody = categories.map {
                 blogAppRepository.getCategoryById(it.toInt()).data!!.toCategoryBody()
             }

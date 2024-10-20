@@ -27,7 +27,6 @@ class SplashScreenViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             preferenceManager.getOnboardingViewed().collect {
-                println("view $it")
                 if (it == true) {
                     val isVerified = blogAppRepository.verify().data ?: false
                     if (isVerified) {

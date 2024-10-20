@@ -1,10 +1,10 @@
 package tech.toshitworks.blogapp.utils
 
 object Constants{
-    const val BASEURL: String = "http://192.168.1.12:8080"
+    const val BASEURL: String = "https://blog-app-backend-production-841d.up.railway.app"
     const val SIGNUP = "user"
     const val LOGIN = "auth/login"
-    const val VERIFY = "auth"
+    const val VERIFY = "auth/verify"
     const val CATEGORY_ALL = "category"
     const val CATEGORY_ADD = "category"
     const val CATEGORY_BY_ID = "category/{id}"
@@ -18,5 +18,4 @@ object Constants{
     const val ADD_POST = "post/{id}"
     const val ADD_COMMENT = "comment/{id}"
     const val USER_BY_ID = "user/id/{id}"
-
 }
